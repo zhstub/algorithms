@@ -9,11 +9,12 @@ public class NQueens {
     private static BigInteger maskBigInteger;
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            int board[] = getExplicitSolution(i);
+        for (int i = 6; i < 16; i++) {
+            int board[] = FindSolution(i);
             System.out.println(CheckSolutionIfValid(board));
             System.out.println(Arrays.toString(board));
             printSolution(board);
+            System.out.println();
         }
 
         testAllApproaches(8);
@@ -196,7 +197,7 @@ public class NQueens {
     }
 
 
-    // explicit solutions exist for all n ≥ 4
+    // Explicit solutions exist for all n >= 4
     public static int[] getExplicitSolution(int n) {
         if (n == 1) {
             return new int[]{0};
@@ -227,13 +228,96 @@ public class NQueens {
     }
 
 
-    public static int[] FindSolution() {
+    public static int[] getExplicitSolutionAlternative(int n) {
+        if (n == 1) {
+            return new int[]{0};
+        } else if (n < 4) {
+            return null;
+        }
 
-        return null;
+        int[] board = new int[n];
+
+        if (n % 6 == 2) {
+            for (int i = 0; i < n / 2; i++) {
+                board[i] = 2 * i + 1;
+                board[i + n / 2] = 2 * i + 2;
+            }
+            board[n / 2] = 2;
+            board[n / 2 + 1] = 0;
+            board[n - 1] = 4;
+        } else if (n % 6 == 3) {
+            for (int i = 0; i < n / 2; i++) {
+                board[i] = 2 * i + 3;
+                board[i + n / 2] = 2 * i + 4;
+            }
+            board[n / 2 - 1] = 1;
+            board[n - 2] = 0;
+            board[n - 1] = 2;
+        } else {
+            for (int i = 0; i < n / 2; i++) {
+                board[i] = 2 * i + 1;
+                board[i + n / 2] = 2 * i;
+            }
+            if (n % 2 != 0) {
+                board[n - 1] = board[n - 2] + 2;
+            }
+        }
+
+        return board;
+    }
+
+
+    public static int[] FindSolution(int n) {
+        if (n == 1) {
+            return new int[]{0};
+        } else if (n < 4) {
+            return null;
+        }
+
+        int[] board = new int[n];
+        int row = 0;
+        int col = 0;
+
+        while (true) {
+            while (row < n && col < n) {
+                if (isSafe(board, row, col)) {
+                    board[row++] = col;
+                    col = 0;
+                } else {
+                    col++;
+                }
+            }
+
+            if (row >= n) {
+                return board;
+            }
+
+            row--;
+            if (row < 0) {
+                return board;
+            } else {
+                col = board[row] + 1;
+            }
+        }
     }
 
 
     public static boolean CheckSolutionIfValid(int[] board) {
+        if (board == null) {
+            return false;
+        }
+
+        for (int i = 1; i < board.length; i++) {
+            if (!isSafe(board, i, board[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    public static boolean CheckSolutionIfValidWithBitOp(int[] board) {
         if (board == null) {
             return false;
         }
@@ -276,12 +360,10 @@ public class NQueens {
                 }
             }
 
-            sb.append(" (");
-            sb.append(board[i]);
-            sb.append(")\n");
+            sb.append(" (").append(board[i]).append(")\n");
         }
 
-        System.out.println(sb);
+        System.out.print(sb);
     }
 
 
