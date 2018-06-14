@@ -2,24 +2,12 @@
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
 
 public class NQueens {
     private static long mask;
     private static BigInteger maskBigInteger;
-
-    public static void main(String[] args) {
-        for (int i = 6; i < 16; i++) {
-            int board[] = FindSolution(i);
-            System.out.println(CheckSolutionIfValid(board));
-            System.out.println(Arrays.toString(board));
-            printSolution(board);
-            System.out.println();
-        }
-
-        testAllApproaches(8);
-        testOneApproach(8, 13);
-    }
 
 
     public static long countSolutionsWithBitOp(int n) {
@@ -294,7 +282,7 @@ public class NQueens {
 
             row--;
             if (row < 0) {
-                return board;
+                return null;
             } else {
                 col = board[row] + 1;
             }
@@ -372,14 +360,14 @@ public class NQueens {
         System.out.println("---------------------------------");
 
         for (int i = 0; i < 1; i++) {
-            long begin = System.currentTimeMillis();
+            long then = System.currentTimeMillis();
 
             long count = countSolutionsWithBitOp(n);
 
-            long then = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
 
             System.out.format("Time: %5dms, Solutions: %7d\n",
-                then - begin, count);
+                now - then, count);
         }
 
         System.out.println("---------------------------------");
@@ -397,6 +385,37 @@ public class NQueens {
             System.out.format("%2d Queens, Time: %5dms, Solutions: %7d\n",
                 n, now - then, count);
         }
+    }
+
+
+    private static void testFindSolution(int n, Function<Integer, int[]> approach) {
+        long then = System.currentTimeMillis();
+
+        int[] board = approach.apply(n);
+
+        long now = System.currentTimeMillis();
+
+        if (CheckSolutionIfValid(board)) {
+            System.out.format("%2d Queens, Time: %5dms\n",
+                n, now - then);
+        }
+    }
+
+
+    public static void main(String[] args) {
+        for (int i = 6; i < 16; i++) {
+            int board[] = FindSolution(i);
+            System.out.println(CheckSolutionIfValid(board));
+            System.out.println(Arrays.toString(board));
+            printSolution(board);
+            System.out.println();
+        }
+
+        testAllApproaches(8);
+        testOneApproach(8, 13);
+
+        System.out.println();
+        testFindSolution(30, NQueens::FindSolution);
     }
 }
 
