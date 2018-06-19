@@ -52,7 +52,8 @@ public class NQueens {
         while (!pos.equals(BigInteger.ZERO)) {
             BigInteger bit = pos.and(pos.negate());
             pos = pos.and(bit.not());
-            count += checkBigInteger(row.or(bit), ld.or(bit).shiftLeft(1), rd.or(bit).shiftRight(1));
+            count += checkBigInteger(row.or(bit),
+                ld.or(bit).shiftLeft(1), rd.or(bit).shiftRight(1));
         }
 
         return count;
@@ -100,7 +101,9 @@ public class NQueens {
 
     private static boolean isSafe(int[] board, int row, int col) {
         for (int i = 0; i < row; i++) {
-            if (board[i] == col || board[i] == col - row + i || board[i] == col + row - i) {
+            if (board[i] == col
+                || i - board[i] == row - col
+                || i + board[i] == row + col) {
                 return false;
             }
         }
@@ -355,67 +358,67 @@ public class NQueens {
     }
 
 
-    private static void testAllApproaches(int n) {
-        System.out.println(n + " Queens Compare");
-        System.out.println("---------------------------------");
+    static void testCountSolutions(int n, Function<Integer, Long> func, String info) {
+        long then = System.currentTimeMillis();
+        long count = func.apply(n);
+        long now = System.currentTimeMillis();
 
-        for (int i = 0; i < 1; i++) {
-            long then = System.currentTimeMillis();
-
-            long count = countSolutionsWithBitOp(n);
-
-            long now = System.currentTimeMillis();
-
-            System.out.format("Time: %5dms, Solutions: %7d\n",
-                now - then, count);
-        }
-
-        System.out.println("---------------------------------");
+        System.out.format("%s: %d Queens, Time: %dms, Solutions: %d\n",
+            info, n, now - then, count);
     }
 
 
-    private static void testOneApproach(int min, int max) {
+    static void testCountSolutions(int min, int max,
+                                   Function<Integer, Long> func, String info) {
+        System.out.println(info);
+        System.out.println("---------------------------------");
+
         for (int n = min; n <= max; n++) {
             long then = System.currentTimeMillis();
-
-            long count = countSolutions(n);
-
+            long count = func.apply(n);
             long now = System.currentTimeMillis();
 
             System.out.format("%2d Queens, Time: %5dms, Solutions: %7d\n",
                 n, now - then, count);
         }
+
+        System.out.println("---------------------------------");
     }
 
 
-    private static void testFindSolution(int n, Function<Integer, int[]> approach) {
+    static void testFindSolution(int n, Function<Integer, int[]> func, String info) {
         long then = System.currentTimeMillis();
-
-        int[] board = approach.apply(n);
-
+        int[] board = func.apply(n);
         long now = System.currentTimeMillis();
 
         if (CheckSolutionIfValid(board)) {
-            System.out.format("%2d Queens, Time: %5dms\n",
-                n, now - then);
+            System.out.format("%s: %d Queens, Time: %dms\n",
+                info, n, now - then);
         }
+    }
+
+
+    static boolean testSolutionIfValid(int min, int max, Function<Integer, int[]> func) {
+        for (int i = min; i < max; i++) {
+            int board[] = func.apply(i);
+            if (!CheckSolutionIfValid(board)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
     public static void main(String[] args) {
-        for (int i = 6; i < 16; i++) {
-            int board[] = FindSolution(i);
-            System.out.println(CheckSolutionIfValid(board));
-            System.out.println(Arrays.toString(board));
-            printSolution(board);
-            System.out.println();
-        }
-
-        testAllApproaches(8);
-        testOneApproach(8, 13);
+        assert testSolutionIfValid(4, 16, NQueens::getExplicitSolution);
 
         System.out.println();
-        testFindSolution(30, NQueens::FindSolution);
+        testCountSolutions(9, NQueens::countSolutions, "Backtracking");
+        System.out.println();
+        testCountSolutions(8, 13, NQueens::countSolutionsWithBitOp, "BitOp");
+        System.out.println();
+        testFindSolution(28, NQueens::FindSolution, "Backtracking");
     }
 }
 
