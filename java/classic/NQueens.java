@@ -1,3 +1,4 @@
+package classic;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -308,7 +309,7 @@ public class NQueens {
     }
 
 
-    public static boolean CheckSolutionIfValidWithBitOp(int[] board) {
+    public static boolean CheckSolutionIfValidWithBigInteger(int[] board) {
         if (board == null) {
             return false;
         }
@@ -415,9 +416,11 @@ public class NQueens {
 
         System.out.println();
         testCountSolutions(9, NQueens::countSolutions, "Backtracking");
+        testCountSolutions(10, NQueens::countSolutions, "Backtracking");
         System.out.println();
         testCountSolutions(8, 13, NQueens::countSolutionsWithBitOp, "BitOp");
         System.out.println();
+        testFindSolution(27, NQueens::FindSolution, "Backtracking");
         testFindSolution(28, NQueens::FindSolution, "Backtracking");
     }
 }
