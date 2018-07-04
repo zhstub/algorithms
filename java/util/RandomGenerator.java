@@ -6,7 +6,7 @@ public class RandomGenerator {
     private static Random r;
 
     static {
-        long seed = System.currentTimeMillis();
+        long seed = System.nanoTime();
         r = new Random(seed);
     }
 
