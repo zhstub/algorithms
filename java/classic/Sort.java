@@ -81,6 +81,42 @@ public class Sort {
     }
 
 
+    public static <T extends Comparable<? super T>> void insertionXSort(T[] a) {
+        insertionXSort(a, T::compareTo);
+    }
+
+    // An optimized version of insertion sort(with half exchanges and a sentinel)
+    public static <T> void insertionXSort(T[] a, Comparator<? super T> c) {
+        int n = a.length;
+
+        // put smallest element in position to serve as sentinel
+        // test: slower than before
+        int min = 0;
+        for (int i = 1; i < n; i++) {
+            if (less(a[i], a[min], c)) {
+                min = i;
+            }
+        }
+        swap(a, 0, min);
+
+        // insertion sort with half-exchanges
+        // test: obviously faster than before
+        for (int i = 2; i < n; i++) {
+            T v = a[i];
+            int j;
+
+            for (j = i; less(v, a[j - 1], c); j--) {
+                a[j] = a[j - 1];
+                swapCount++;
+            }
+
+            a[j] = v;
+        }
+
+        assert isSorted(a, c);
+    }
+
+
     public static <T extends Comparable<? super T>> void shellSort(T[] a) {
         shellSort(a, T::compareTo);
     }
@@ -152,7 +188,7 @@ public class Sort {
         long total = 0;
         Double[] a = new Double[n];
 
-        for (int t = 0; t < trials; t++) {
+        for (int i = 0; i < trials; i++) {
             Filler.fill(a, RandomGenerator.DOUBLE);
 
             long start = System.nanoTime();
@@ -166,15 +202,10 @@ public class Sort {
 
     public static void compareSort(Consumer<Double[]> alg1, Consumer<Double[]> alg2,
                                    int n, int trials) {
-        System.out.format("%d random doubles, %d trials\n", n, trials);
-
         cmpCount = 0;
         swapCount = 0;
 
         long time1 = measureTime(alg1, n, trials);
-
-        System.out.format("alg1, time: %4dms, cmp: %d, swap: %d\n",
-            time1, cmpCount, swapCount);
 
         long tmpCmpCount = cmpCount;
         long tmpSwapCount = swapCount;
@@ -183,13 +214,12 @@ public class Sort {
 
         long time2 = measureTime(alg2, n, trials);
 
-        System.out.format("alg2, time: %4dms, cmp: %d, swap: %d\n",
-            time2, cmpCount, swapCount);
+        System.out.format("%d random doubles, %d trials\n", n, trials);
+        System.out.format("alg1: %dms, alg2: %dms, ratio: %.2f\n",
+            time1, time2, (double)time1 / time2);
 
-        System.out.format("ratio, time: %.2f, cmp: %.2f, swap: %.2f\n",
-            (double)time1 / time2,
-            (double)tmpCmpCount / cmpCount,
-            (double)tmpSwapCount / swapCount);
+        System.out.format("alg1, cmp: %d, swap: %d\n", tmpCmpCount, tmpSwapCount);
+        System.out.format("alg2, cmp: %d, swap: %d\n", cmpCount, swapCount);
     }
 
     public static void compareSort2(Consumer<Double[]> alg1, Consumer<Double[]> alg2,
@@ -198,7 +228,7 @@ public class Sort {
         long time2 = 0;
         Double[] a = new Double[n];
 
-        for (int t = 0; t < trials; t++) {
+        for (int i = 0; i < trials; i++) {
             Filler.fill(a, RandomGenerator.DOUBLE);
 
             long start = System.nanoTime();
@@ -230,12 +260,12 @@ public class Sort {
 
         String a2[] = new String[10];
         Filler.fill(a2, RandomGenerator.STRING);
-        selectionSort(a2, Comparator.comparingInt(String::length).thenComparing(String::compareTo));
+        shellSort(a2, Comparator.comparingInt(String::length).thenComparing(String::compareTo));
         System.out.println(Arrays.toString(a2));
 
         System.out.println();
-        compareSort(Sort::selectionSort, Sort::insertionSort, 2000, 100);
+        compareSort2(Sort::insertionSort, Sort::selectionSort, 2000, 100);
         System.out.println();
-        compareSort2(Sort::selectionSort, Sort::insertionSort, 2000, 100);
+        compareSort(Sort::insertionSort, Sort::selectionSort, 2000, 100);
     }
 }
